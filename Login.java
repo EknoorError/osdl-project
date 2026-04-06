@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
+import javafx.scene.layout.BackgroundSize;
 import javafx.stage.Stage;
 
 import java.sql.Connection;
@@ -25,14 +26,22 @@ public class Login extends Application {
         
         // Background Image
         try {
-            Image bgImg = new Image(getClass().getResource("login-bg.png").toExternalForm());
-            BackgroundImage bImg = new BackgroundImage(bgImg, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(100, 100, true, true, false, true));
+            java.net.URL imgUrl = getClass().getResource("login-bg.png");
+            if (imgUrl == null) {
+                imgUrl = new java.io.File(System.getProperty("user.dir") + "/login-bg.png").toURI().toURL();
+            }
+            Image bgImg = new Image(imgUrl.toExternalForm());
+            BackgroundImage bImg = new BackgroundImage(bgImg,
+                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(1.0, 1.0, true, true, false, false));
             root.setBackground(new Background(bImg));
-        } catch (Exception e) {}
+        } catch (Exception e) { e.printStackTrace(); }
         
         // Overlay to darken background
         Region overlay = new Region();
-        overlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.5);");
+        overlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.55);");
+        overlay.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         
         // Main Panel Container
         HBox panel = new HBox();

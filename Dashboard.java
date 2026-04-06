@@ -15,12 +15,10 @@ import java.util.concurrent.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 
-
 public class Dashboard extends Application {
 
     public final List<String> ALL_SLOTS = Arrays.asList("A-01", "A-02", "A-03", "B-01", "B-02", "B-03", "C-01",
             "C-02");
-
 
     // In-memory simulation states
     public static class SimSession {
@@ -223,8 +221,7 @@ public class Dashboard extends Application {
 
         // Ensure initial seeds only trigger once if lists are empty
         if (recentActivities.isEmpty()) {
-            recentActivities.add(new ActivityLog("\u26A0", "#ff716c", "System Warning D-04",
-                    "Network connection unstable \u2022 12m ago"));
+            recentActivities.add(new ActivityLog("\u26A0", "#6cff73ff", "User Logged in", ""));
         }
     }
 
@@ -305,30 +302,39 @@ public class Dashboard extends Application {
                         double type2Std = 0.44;
                         double type1Ultra = 0.88;
                         double type2Ultra = 0.88;
-                        while(rsSettings.next()) {
-                            if("t1s".equals(rsSettings.getString("key"))) type1Std = Double.parseDouble(rsSettings.getString("value"));
-                            if("t2s".equals(rsSettings.getString("key"))) type2Std = Double.parseDouble(rsSettings.getString("value"));
-                            if("t1u".equals(rsSettings.getString("key"))) type1Ultra = Double.parseDouble(rsSettings.getString("value"));
-                            if("t2u".equals(rsSettings.getString("key"))) type2Ultra = Double.parseDouble(rsSettings.getString("value"));
+                        while (rsSettings.next()) {
+                            if ("t1s".equals(rsSettings.getString("key")))
+                                type1Std = Double.parseDouble(rsSettings.getString("value"));
+                            if ("t2s".equals(rsSettings.getString("key")))
+                                type2Std = Double.parseDouble(rsSettings.getString("value"));
+                            if ("t1u".equals(rsSettings.getString("key")))
+                                type1Ultra = Double.parseDouble(rsSettings.getString("value"));
+                            if ("t2u".equals(rsSettings.getString("key")))
+                                type2Ultra = Double.parseDouble(rsSettings.getString("value"));
                         }
                         double kwh = sim.protocol.contains("Type 1") ? 42.0 : 62.4;
                         double rate = 0;
-                        if (sim.protocol.contains("Type 1") && sim.protocol.contains("Standard")) rate = type1Std;
-                        else if (sim.protocol.contains("Type 2") && sim.protocol.contains("Standard")) rate = type2Std;
-                        else if (sim.protocol.contains("Type 1") && sim.protocol.contains("Ultra Fast")) rate = type1Ultra;
-                        else if (sim.protocol.contains("Type 2") && sim.protocol.contains("Ultra Fast")) rate = type2Ultra;
-                        else rate = type1Std; // Default fallback
-                        
+                        if (sim.protocol.contains("Type 1") && sim.protocol.contains("Standard"))
+                            rate = type1Std;
+                        else if (sim.protocol.contains("Type 2") && sim.protocol.contains("Standard"))
+                            rate = type2Std;
+                        else if (sim.protocol.contains("Type 1") && sim.protocol.contains("Ultra Fast"))
+                            rate = type1Ultra;
+                        else if (sim.protocol.contains("Type 2") && sim.protocol.contains("Ultra Fast"))
+                            rate = type2Ultra;
+                        else
+                            rate = type1Std; // Default fallback
+
                         rev = kwh * rate;
-                    } catch (Exception ignored) {}
-                    
+                    } catch (Exception ignored) {
+                    }
+
                     recentActivities.add(0, new ActivityLog("\u2713", "#3fff8b", "Slot " + sim.slot + " Completed",
                             energy + " \u2022 100% \u2022 Just now"));
                     if (recentActivities.size() > 4)
                         recentActivities.remove(recentActivities.size() - 1);
 
                     // Move to completed_sessions handled in Checkout.java confirmation now
-
 
                     // Insert to Pending Payments
                     try (PreparedStatement pstmt = conn.prepareStatement(
@@ -359,7 +365,6 @@ public class Dashboard extends Application {
             if (revRs.next())
                 calRev = revRs.getDouble(1);
             final double currentRev = calRev;
-
 
             // Push to UI thread using static instance check
             Platform.runLater(() -> {
@@ -392,17 +397,24 @@ public class Dashboard extends Application {
 
             if (!slotSpeedFilter.equals("ALL")) {
                 boolean isHigh = slotName.startsWith("A") || slotName.startsWith("B");
-                if (slotSpeedFilter.equals("HIGH_SPEED") && !isHigh) visible = false;
-                if (slotSpeedFilter.equals("STANDARD") && isHigh) visible = false;
+                if (slotSpeedFilter.equals("HIGH_SPEED") && !isHigh)
+                    visible = false;
+                if (slotSpeedFilter.equals("STANDARD") && isHigh)
+                    visible = false;
             }
 
             SimSession sim = activeCharges.get(slotName);
-            String currentStatus = (sim == null) ? "AVAILABLE" : ("Payment Pending".equals(sim.status) ? "PAYMENT PENDING" : "CHARGING");
-            
+            String currentStatus = (sim == null) ? "AVAILABLE"
+                    : ("Payment Pending".equals(sim.status) ? "PAYMENT PENDING" : "CHARGING");
+
             if (!slotStatusFilter.equals("ALL")) {
-                if (slotStatusFilter.equals("AVAILABLE") && !currentStatus.equals("AVAILABLE")) visible = false;
-                if (slotStatusFilter.equals("CHARGING") && (!currentStatus.equals("CHARGING") && !currentStatus.equals("PAYMENT PENDING"))) visible = false;
-                if (slotStatusFilter.equals("MAINTENANCE") && !currentStatus.equals("MAINTENANCE")) visible = false;
+                if (slotStatusFilter.equals("AVAILABLE") && !currentStatus.equals("AVAILABLE"))
+                    visible = false;
+                if (slotStatusFilter.equals("CHARGING")
+                        && (!currentStatus.equals("CHARGING") && !currentStatus.equals("PAYMENT PENDING")))
+                    visible = false;
+                if (slotStatusFilter.equals("MAINTENANCE") && !currentStatus.equals("MAINTENANCE"))
+                    visible = false;
             }
 
             ui.card.setVisible(visible);
@@ -413,7 +425,8 @@ public class Dashboard extends Application {
                 String rate = finalSim.protocol.contains("Ultra") ? "280 kW/h" : "120 kW/h";
                 int timeLeft = (int) ((100 - finalSim.progress) / 3.5);
                 if ("Payment Pending".equals(finalSim.status)) {
-                    ui.update("Payment Pending", finalSim.user != null ? finalSim.user : "Unknown User", "#ffae00", (int)finalSim.progress + "%",
+                    ui.update("Payment Pending", finalSim.user != null ? finalSim.user : "Unknown User", "#ffae00",
+                            (int) finalSim.progress + "%",
                             "Stopped", "Awaiting checkout", true);
                 } else {
                     ui.update("Charging", finalSim.user != null ? finalSim.user : "Unknown User", "#81ecff",
@@ -438,7 +451,6 @@ public class Dashboard extends Application {
                         ex.printStackTrace();
                     }
                 });
-
 
             } else {
                 ui.update("Ready", "Available", "#3fff8b", null, null, null, true);
@@ -493,12 +505,14 @@ public class Dashboard extends Application {
                 "-fx-background-color: #9f0519; -fx-text-fill: white; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 12 0; -fx-cursor: hand;");
         emergency.setOnAction(e -> {
             try (Connection conn = DriverManager.getConnection("jdbc:sqlite:sessions.db");
-                 Statement stmt = conn.createStatement()) {
+                    Statement stmt = conn.createStatement()) {
                 stmt.execute("DELETE FROM sessions");
                 stmt.execute("DELETE FROM pending_payments");
                 activeCharges.clear();
                 new Dashboard().start(stage);
-            } catch (Exception ex) { ex.printStackTrace(); }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         });
         VBox emergencyBox = new VBox(emergency);
         emergencyBox.setPadding(new Insets(32, 16, 0, 16));
@@ -543,7 +557,7 @@ public class Dashboard extends Application {
                     Label subtitle = new Label("This module is currently detached and pending completion in v1.1.");
                     subtitle.setStyle("-fx-text-fill: #adaaaa; -fx-font-size: 14px;");
                     placeholder.getChildren().addAll(m_title, subtitle);
-                    ((BorderPane)stage.getScene().getRoot()).setCenter(placeholder);
+                    ((BorderPane) stage.getScene().getRoot()).setCenter(placeholder);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -590,7 +604,6 @@ public class Dashboard extends Application {
         return topNav;
     }
 
-
     private void handleLogout(Stage stage) {
         try {
             new Login().start(stage);
@@ -598,7 +611,6 @@ public class Dashboard extends Application {
             e.printStackTrace();
         }
     }
-
 
     private VBox createMainContent() {
         VBox content = new VBox(32);
@@ -674,17 +686,19 @@ public class Dashboard extends Application {
                 createStatusTab("Available", "#3fff8b", false),
                 createStatusTab("Charging", "#81ecff", false),
                 createStatusTab("Maintenance", "#ff716c", false));
-        
+
         for (javafx.scene.Node n : statusTabs.getChildren()) {
             n.setOnMouseClicked(e -> {
                 for (javafx.scene.Node node : statusTabs.getChildren()) {
                     node.setStyle("-fx-padding: 8 16;");
-                    ((Label)((HBox)node).getChildren().get(1)).setStyle("-fx-text-fill: #adaaaa; -fx-font-size: 10px; -fx-font-weight: bold;");
+                    ((Label) ((HBox) node).getChildren().get(1))
+                            .setStyle("-fx-text-fill: #adaaaa; -fx-font-size: 10px; -fx-font-weight: bold;");
                 }
                 n.setStyle("-fx-background-color: #262626; -fx-padding: 8 16; -fx-background-radius: 2;");
-                ((Label)((HBox)n).getChildren().get(1)).setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-font-weight: bold;");
-                
-                String tabTxt = ((Label)((HBox)n).getChildren().get(1)).getText();
+                ((Label) ((HBox) n).getChildren().get(1))
+                        .setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-font-weight: bold;");
+
+                String tabTxt = ((Label) ((HBox) n).getChildren().get(1)).getText();
                 this.slotStatusFilter = tabTxt.toUpperCase();
                 refreshUI();
             });
@@ -696,27 +710,8 @@ public class Dashboard extends Application {
 
         // Bottom Layout
         HBox bottomSection = new HBox(32);
-
-        VBox mapBox = new VBox(8);
-        mapBox.setStyle("-fx-background-color: #131313; -fx-background-radius: 4; -fx-padding: 24;");
-        Label mapTitle = new Label("Station Network");
-        mapTitle.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
-        ImageView mapPlaceholder = new ImageView();
-        try {
-            mapPlaceholder.setImage(new javafx.scene.image.Image(getClass().getResource("signup-bg.png").toExternalForm()));
-            mapPlaceholder.setFitWidth(400);
-            mapPlaceholder.setFitHeight(200);
-            mapPlaceholder.setPreserveRatio(false);
-            javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(400, 200);
-            clip.setArcWidth(8); clip.setArcHeight(8);
-            mapPlaceholder.setClip(clip);
-        } catch (Exception e) {}
-        
-        mapBox.getChildren().add(mapPlaceholder);
-        HBox.setHgrow(mapBox, Priority.ALWAYS);
-
-
-        bottomSection.getChildren().addAll(mapBox, activityBox);
+        HBox.setHgrow(activityBox, Priority.ALWAYS);
+        bottomSection.getChildren().add(activityBox);
 
         content.getChildren().addAll(summaryBento, gridSection, bottomSection);
         refreshUI();
@@ -748,16 +743,21 @@ public class Dashboard extends Application {
                 : "-fx-background-color: transparent; -fx-text-fill: #adaaaa; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 8 16;");
         btn.setOnAction(e -> {
             if (btn.getParent() != null) {
-                for (javafx.scene.Node sibling : ((HBox)btn.getParent()).getChildren()) {
-                    sibling.setStyle("-fx-background-color: transparent; -fx-text-fill: #adaaaa; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 8 16;");
+                for (javafx.scene.Node sibling : ((HBox) btn.getParent()).getChildren()) {
+                    sibling.setStyle(
+                            "-fx-background-color: transparent; -fx-text-fill: #adaaaa; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 8 16;");
                 }
             }
-            btn.setStyle("-fx-background-color: #262626; -fx-text-fill: white; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 8 16;");
-            
-            if (txt.equals("All Slots")) this.slotSpeedFilter = "ALL";
-            else if (txt.equals("High Speed")) this.slotSpeedFilter = "HIGH_SPEED";
-            else if (txt.equals("Standard")) this.slotSpeedFilter = "STANDARD";
-            
+            btn.setStyle(
+                    "-fx-background-color: #262626; -fx-text-fill: white; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 8 16;");
+
+            if (txt.equals("All Slots"))
+                this.slotSpeedFilter = "ALL";
+            else if (txt.equals("High Speed"))
+                this.slotSpeedFilter = "HIGH_SPEED";
+            else if (txt.equals("Standard"))
+                this.slotSpeedFilter = "STANDARD";
+
             refreshUI();
         });
         return btn;
