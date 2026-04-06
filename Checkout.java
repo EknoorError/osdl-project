@@ -69,6 +69,7 @@ public class Checkout extends Application {
         stage.show();
     }
 
+    // Sidebar – left navigation panel with app title, nav links and emergency stop
     private VBox createSidebar(Stage stage) {
         VBox sidebar = new VBox();
         sidebar.setPrefWidth(256);
@@ -84,12 +85,14 @@ public class Checkout extends Application {
         subtitle.setStyle("-fx-font-size: 10px; -fx-text-fill: #adaaaa; -fx-opacity: 0.6;");
         header.getChildren().addAll(title, subtitle);
 
+        // Nav menu – Dashboard and Plug In navigation links
         VBox navMenu = new VBox(8);
         navMenu.getChildren().addAll(
                 createNavItem("Dashboard", false, stage),
                 createNavItem("Plug In", false, stage));
         VBox.setVgrow(navMenu, Priority.ALWAYS);
 
+        // Bottom nav items – Support, Settings and Emergency Stop button
         VBox bottomMenu = new VBox(8);
         bottomMenu.setPadding(new Insets(24, 0, 24, 0));
         bottomMenu.getChildren().addAll(
@@ -116,6 +119,7 @@ public class Checkout extends Application {
         return sidebar;
     }
 
+    // Nav item – single clickable row that routes to the selected module
     private HBox createNavItem(String text, boolean active, Stage stage) {
         HBox box = new HBox(16);
         box.setAlignment(Pos.CENTER_LEFT);
@@ -150,7 +154,7 @@ public class Checkout extends Application {
                     Label subtitle = new Label("This module is currently detached and pending completion in v1.1.");
                     subtitle.setStyle("-fx-text-fill: #adaaaa; -fx-font-size: 14px;");
                     placeholder.getChildren().addAll(m_title, subtitle);
-                    ((BorderPane)stage.getScene().getRoot()).setCenter(placeholder);
+                    ((BorderPane) stage.getScene().getRoot()).setCenter(placeholder);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -160,6 +164,7 @@ public class Checkout extends Application {
         return box;
     }
 
+    // Top navbar – search bar and user avatar with profile/logout menu
     private HBox createTopNav() {
         HBox topNav = new HBox(16);
         topNav.setPrefHeight(64);
@@ -201,7 +206,6 @@ public class Checkout extends Application {
         }
     }
 
-
     private VBox createMainContent(Stage stage) {
         // Query Database
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:sessions.db")) {
@@ -214,31 +218,36 @@ public class Checkout extends Application {
                 this.user = rs.getString("username");
                 this.protocol = rs.getString("protocol");
                 double progress = rs.getDouble("progress");
-                
+
                 // Calculate revenue based on protocol
                 double totalKwh = protocol.contains("Type 1") ? 42.0 : 62.4;
                 double currentKwh = totalKwh * (progress / 100.0);
                 double rate = 0.44; // Default
                 try (Statement stmtS = conn.createStatement();
-                     ResultSet rsS = stmtS.executeQuery("SELECT key, value FROM settings")) {
-                     while(rsS.next()){
-                         String k = rsS.getString("key");
-                         String v = rsS.getString("value");
-                         if(protocol.contains("Type 1") && protocol.contains("Standard") && "t1s".equals(k)) rate = Double.parseDouble(v);
-                         else if(protocol.contains("Type 2") && protocol.contains("Standard") && "t2s".equals(k)) rate = Double.parseDouble(v);
-                         else if(protocol.contains("Type 1") && protocol.contains("Ultra Fast") && "t1u".equals(k)) rate = Double.parseDouble(v);
-                         else if(protocol.contains("Type 2") && protocol.contains("Ultra Fast") && "t2u".equals(k)) rate = Double.parseDouble(v);
-                     }
-                } catch(Exception ignored){}
-                
+                        ResultSet rsS = stmtS.executeQuery("SELECT key, value FROM settings")) {
+                    while (rsS.next()) {
+                        String k = rsS.getString("key");
+                        String v = rsS.getString("value");
+                        if (protocol.contains("Type 1") && protocol.contains("Standard") && "t1s".equals(k))
+                            rate = Double.parseDouble(v);
+                        else if (protocol.contains("Type 2") && protocol.contains("Standard") && "t2s".equals(k))
+                            rate = Double.parseDouble(v);
+                        else if (protocol.contains("Type 1") && protocol.contains("Ultra Fast") && "t1u".equals(k))
+                            rate = Double.parseDouble(v);
+                        else if (protocol.contains("Type 2") && protocol.contains("Ultra Fast") && "t2u".equals(k))
+                            rate = Double.parseDouble(v);
+                    }
+                } catch (Exception ignored) {
+                }
+
                 this.revenue = currentKwh * rate;
                 this.energy = String.format("%.1f kWh", currentKwh);
-                this.duration = (progress >= 100) ? "Session completed" : String.format("Stopped at %d%%", (int)progress);
+                this.duration = (progress >= 100) ? "Session completed"
+                        : String.format("Stopped at %d%%", (int) progress);
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-
 
         VBox content = new VBox(32);
         content.setMaxWidth(1100);
@@ -259,7 +268,7 @@ public class Checkout extends Application {
         VBox leftCol = new VBox(24);
         HBox.setHgrow(leftCol, Priority.ALWAYS);
 
-        // Breakdown Card
+        // Itemized billing breakdown card – energy, protocol and network fee rows
         VBox breakdownCard = new VBox(24);
         breakdownCard.setStyle("-fx-background-color: #1a1a1a; -fx-padding: 32; -fx-background-radius: 12;");
         Label bdTitle = new Label("ITEMIZED BREAKDOWN (" + user + ")");
@@ -273,7 +282,7 @@ public class Checkout extends Application {
                 createBillingRow("Network & Handling", "Standard Tier", String.format("$%.2f", revenue * 0.10), false));
         breakdownCard.getChildren().addAll(bdTitle, itemsBox);
 
-        // Payment Method Card
+        // Payment method card – Cash option and Add New Method option
         VBox paymentCard = new VBox(24);
         paymentCard.setStyle("-fx-background-color: #1a1a1a; -fx-padding: 32; -fx-background-radius: 12;");
         Label payTitle = new Label("PAYMENT METHOD");
@@ -301,7 +310,6 @@ public class Checkout extends Application {
         optMain.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
         opt1.getChildren().addAll(opt1Head, optSub, optMain);
 
-
         // Option 2 (Add New)
         VBox opt2 = new VBox(8);
         HBox.setHgrow(opt2, Priority.ALWAYS);
@@ -314,14 +322,18 @@ public class Checkout extends Application {
         addTxt.setStyle("-fx-text-fill: #adaaaa; -fx-font-size: 12px; -fx-font-weight: bold; -fx-letter-spacing: 1px;");
         opt2.getChildren().addAll(addIcon, addTxt);
         opt2.setOnMouseClicked(e -> {
-            opt1.setStyle("-fx-background-color: #20201f; -fx-border-color: rgba(72,72,71,0.5); -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 24;");
-            opt2.setStyle("-fx-background-color: #20201f; -fx-border-color: #81ecff; -fx-border-width: 2; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 24;");
+            opt1.setStyle(
+                    "-fx-background-color: #20201f; -fx-border-color: rgba(72,72,71,0.5); -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 24;");
+            opt2.setStyle(
+                    "-fx-background-color: #20201f; -fx-border-color: #81ecff; -fx-border-width: 2; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 24;");
             btnPay.setText("ADD CARD & PAY \u203A");
             radioDot.setFill(Color.TRANSPARENT);
         });
         opt1.setOnMouseClicked(e -> {
-            opt2.setStyle("-fx-background-color: rgba(26,26,26,0.5); -fx-border-color: rgba(72,72,71,0.5); -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 24; -fx-cursor: hand;");
-            opt1.setStyle("-fx-background-color: #20201f; -fx-border-color: #81ecff; -fx-border-width: 2; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 24;");
+            opt2.setStyle(
+                    "-fx-background-color: rgba(26,26,26,0.5); -fx-border-color: rgba(72,72,71,0.5); -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 24; -fx-cursor: hand;");
+            opt1.setStyle(
+                    "-fx-background-color: #20201f; -fx-border-color: #81ecff; -fx-border-width: 2; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 24;");
             btnPay.setText("CONFIRM & PAY \u203A");
             radioDot.setFill(Color.web("#81ecff"));
         });
@@ -335,7 +347,7 @@ public class Checkout extends Application {
         VBox rightCol = new VBox(24);
         rightCol.setPrefWidth(400);
 
-        // Total Display Card
+        // Total amount card – shows the grand total, Confirm & Pay and Print Receipt buttons
         VBox totalCard = new VBox(24);
         totalCard.setStyle(
                 "-fx-background-color: #20201f; -fx-border-color: transparent transparent transparent #81ecff; -fx-border-width: 0 0 0 4; -fx-border-radius: 4; -fx-background-radius: 12; -fx-padding: 32;");
@@ -358,9 +370,10 @@ public class Checkout extends Application {
         btnPay.setOnAction(e -> {
             try (Connection conn = DriverManager.getConnection("jdbc:sqlite:sessions.db")) {
                 String cleanSlot = slot != null ? slot.trim() : "";
-                
+
                 // 1. Move to completed_sessions (Mark as paid/finalized)
-                String endTimeStr = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                String endTimeStr = java.time.LocalDateTime.now()
+                        .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 String sqlComplete = "INSERT INTO completed_sessions (slot, username, protocol, start_time, end_time, revenue) VALUES (?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement pstmt = conn.prepareStatement(sqlComplete)) {
                     pstmt.setString(1, cleanSlot);
@@ -377,14 +390,16 @@ public class Checkout extends Application {
                 PreparedStatement pstmt = conn.prepareStatement(query);
                 pstmt.setString(1, cleanSlot);
                 int deletedRows = pstmt.executeUpdate();
-                System.out.println("Payment Confirmed. Deleted " + deletedRows + " rows from pending_payments for slot: " + cleanSlot);
-                
+                System.out.println("Payment Confirmed. Deleted " + deletedRows
+                        + " rows from pending_payments for slot: " + cleanSlot);
+
                 new Dashboard().start(stage);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         });
 
+        // Button – Print Receipt: writes a text receipt file to disk
         Button btnPrint = new Button("\uD83D\uDDA8 PRINT RECEIPT");
         btnPrint.setMaxWidth(Double.MAX_VALUE);
         btnPrint.setStyle(
@@ -393,28 +408,32 @@ public class Checkout extends Application {
             try {
                 String safeSlot = (slot != null && !slot.isEmpty()) ? slot.replace("-", "").trim() : "unknown";
                 String receiptContent = "========================================\n" +
-                                        "          VOLT CHARGE RECEIPT           \n" +
-                                        "========================================\n" +
-                                        "Session ID: " + safeSlot + "\n" +
-                                        "User:       " + user + "\n" +
-                                        "Protocol:   " + protocol + "\n" +
-                                        "Energy:     " + energy + "\n" +
-                                        "Duration:   " + duration + "\n" +
-                                        "----------------------------------------\n" +
-                                        "TOTAL DUE:  $" + String.format("%.2f", revenue) + "\n" +
-                                        "========================================\n" +
-                                        "Thank you for choosing Volt Charge.";
-                java.nio.file.Files.writeString(java.nio.file.Paths.get("receipt_" + safeSlot + ".txt"), receiptContent);
+                        "          VOLT CHARGE RECEIPT           \n" +
+                        "========================================\n" +
+                        "Session ID: " + safeSlot + "\n" +
+                        "User:       " + user + "\n" +
+                        "Protocol:   " + protocol + "\n" +
+                        "Energy:     " + energy + "\n" +
+                        "Duration:   " + duration + "\n" +
+                        "----------------------------------------\n" +
+                        "TOTAL DUE:  $" + String.format("%.2f", revenue) + "\n" +
+                        "========================================\n" +
+                        "Thank you for choosing Volt Charge.";
+                java.nio.file.Files.writeString(java.nio.file.Paths.get("receipt_" + safeSlot + ".txt"),
+                        receiptContent);
                 btnPrint.setText("RECEIPT PRINTED \u2713");
-                btnPrint.setStyle("-fx-background-color: #3fff8b; -fx-text-fill: #000000; -fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 16; -fx-background-radius: 6; -fx-cursor: default; -fx-letter-spacing: 2px;");
+                btnPrint.setStyle(
+                        "-fx-background-color: #3fff8b; -fx-text-fill: #000000; -fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 16; -fx-background-radius: 6; -fx-cursor: default; -fx-letter-spacing: 2px;");
                 btnPrint.setDisable(true);
-            } catch(Exception ex) { ex.printStackTrace(); }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         });
 
         btnBox.getChildren().addAll(btnPay, btnPrint);
         totalCard.getChildren().addAll(totTitle, totBox, btnBox);
 
-        // Map Card
+        // Station location card – static map placeholder with station address
         VBox mapCard = new VBox();
         mapCard.setPrefHeight(200);
         mapCard.setStyle("-fx-background-color: #1a1a1a; -fx-background-radius: 12; -fx-overflow: hidden;");
@@ -434,7 +453,7 @@ public class Checkout extends Application {
 
         mapCard.getChildren().addAll(mapImg, mapFooter);
 
-        // Energy Flow
+        // Energy performance card – shows charging efficiency progress bar
         VBox energyCard = new VBox(16);
         energyCard.setStyle("-fx-background-color: #1a1a1a; -fx-background-radius: 12; -fx-padding: 24;");
         HBox enHeader = new HBox();
@@ -464,6 +483,7 @@ public class Checkout extends Application {
         return content;
     }
 
+    // Billing row – a single line item showing label, value and cost
     private VBox createBillingRow(String topTxt, String botTxt, String costStr, boolean border) {
         VBox row = new VBox();
         if (border) {
@@ -494,6 +514,7 @@ public class Checkout extends Application {
         return row;
     }
 
+    // Footer – charger and connector info with copyright notice
     private HBox createFooter() {
         HBox footer = new HBox(32);
         footer.setAlignment(Pos.CENTER_LEFT);

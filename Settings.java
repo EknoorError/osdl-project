@@ -56,21 +56,25 @@ public class Settings extends Application {
         Label title = new Label("System Settings");
         title.setStyle("-fx-text-fill: white; -fx-font-size: 48px; -fx-font-weight: bold;");
 
+        // Pricing configuration card – rate fields for all four protocol/speed combinations
         VBox pricingCard = new VBox(24);
         pricingCard.setStyle("-fx-background-color: #1a1a1a; -fx-padding: 32; -fx-background-radius: 12;");
         
         Label pricingLabel = new Label("PRICING CONFIGURATION");
         pricingLabel.setStyle("-fx-text-fill: #adaaaa; -fx-font-size: 12px; -fx-font-weight: bold; -fx-letter-spacing: 2px;");
 
+        // Input fields – one per protocol/speed rate (Type 1 Standard, Type 2 Standard, etc.)
         t1sField = createFieldRow(pricingCard, "Type 1 (Standard) Rate ($/kWh):");
         t2sField = createFieldRow(pricingCard, "Type 2 (Standard) Rate ($/kWh):");
         t1uField = createFieldRow(pricingCard, "Type 1 (Ultra Fast) Rate ($/kWh):");
         t2uField = createFieldRow(pricingCard, "Type 2 (Ultra Fast) Rate ($/kWh):");
 
+        // Button – Save Changes: persists updated rates to the settings DB table
         Button saveBtn = new Button("SAVE CHANGES");
         saveBtn.setStyle("-fx-background-color: #3fff8b; -fx-text-fill: #000000; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 12 24; -fx-background-radius: 4; -fx-cursor: hand;");
         saveBtn.setOnAction(e -> saveSettings());
 
+        // Button – Reset Earnings: wipes all records from completed_sessions table
         Button resetBtn = new Button("RESET EARNINGS");
         resetBtn.setStyle("-fx-background-color: #9f0519; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 12 24; -fx-background-radius: 4; -fx-cursor: hand;");
         resetBtn.setOnAction(e -> {
@@ -106,6 +110,7 @@ public class Settings extends Application {
         return f;
     }
 
+    // loadSettings – reads rate values from DB and populates the input fields
     private void loadSettings() {
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:sessions.db");
              Statement stmt = conn.createStatement()) {
@@ -130,6 +135,7 @@ public class Settings extends Application {
         }
     }
 
+    // saveSettings – writes all four rate fields back to the settings table
     private void saveSettings() {
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:sessions.db");
              PreparedStatement pstmt = conn.prepareStatement("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)")) {
@@ -153,6 +159,7 @@ public class Settings extends Application {
         pstmt.executeUpdate();
     }
 
+    // Sidebar – left navigation panel with app branding, nav links and emergency stop
     private VBox createSidebar(Stage stage) {
         VBox sidebar = new VBox();
         sidebar.setPrefWidth(256);
@@ -219,6 +226,7 @@ public class Settings extends Application {
         return box;
     }
 
+    // Top navbar – search bar and user avatar with profile/logout menu
     private HBox createTopNav() {
         HBox topNav = new HBox(16);
         topNav.setPrefHeight(64);

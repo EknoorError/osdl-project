@@ -3,7 +3,6 @@ import java.util.List;
 
 import javafx.scene.layout.Region;
 
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -35,7 +34,6 @@ public class Plugin extends Application {
     public Plugin(String slotId) {
         this.preSelectedSlot = slotId;
     }
-
 
     @Override
     public void start(Stage stage) {
@@ -73,6 +71,7 @@ public class Plugin extends Application {
         stage.show();
     }
 
+    // Sidebar – With Plugin, Emergency Stop, Settings etc
     private VBox createSidebar(Stage stage) {
         VBox sidebar = new VBox();
         sidebar.setPrefWidth(256);
@@ -103,11 +102,13 @@ public class Plugin extends Application {
         emergency.getStyleClass().add("emergency-btn");
         emergency.setOnAction(e -> {
             try (Connection conn = DriverManager.getConnection("jdbc:sqlite:sessions.db");
-                 java.sql.Statement stmt = conn.createStatement()) {
+                    java.sql.Statement stmt = conn.createStatement()) {
                 stmt.execute("DELETE FROM sessions");
                 stmt.execute("DELETE FROM pending_payments");
                 new Dashboard().start(stage);
-            } catch (Exception ex) { ex.printStackTrace(); }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         });
         VBox emergencyBox = new VBox(emergency);
         emergencyBox.setPadding(new Insets(32, 16, 0, 16));
@@ -118,6 +119,7 @@ public class Plugin extends Application {
         return sidebar;
     }
 
+    // Nav item – Each Row
     private HBox createNavItem(String text, boolean active, Stage stage) {
         HBox box = new HBox(16);
         box.setAlignment(Pos.CENTER_LEFT);
@@ -149,7 +151,7 @@ public class Plugin extends Application {
                     Label subtitle = new Label("This module is currently detached and pending completion in v1.1.");
                     subtitle.setStyle("-fx-text-fill: #adaaaa; -fx-font-size: 14px;");
                     placeholder.getChildren().addAll(m_title, subtitle);
-                    ((BorderPane)stage.getScene().getRoot()).setCenter(placeholder);
+                    ((BorderPane) stage.getScene().getRoot()).setCenter(placeholder);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -159,6 +161,7 @@ public class Plugin extends Application {
         return box;
     }
 
+    // Top navbar – spacer and user avatar with profile/logout context menu
     private HBox createTopNav() {
         HBox topNav = new HBox();
         topNav.setPrefHeight(64);
@@ -188,7 +191,6 @@ public class Plugin extends Application {
             e.printStackTrace();
         }
     }
-
 
     private VBox createMainContent() {
         VBox content = new VBox(48);
@@ -220,12 +222,14 @@ public class Plugin extends Application {
         VBox container = new VBox(32);
         container.getStyleClass().addAll("bg-surface-container", "card");
 
-        // Assign Button
+        // Button – Assign Slot: saves a new charging session to the DB for the chosen
+        // slot
         Button assignBtn = new Button("ASSIGN SLOT");
         assignBtn.setMaxWidth(Double.MAX_VALUE);
         assignBtn.getStyleClass().add("assign-btn");
 
-        // Slot Selection
+        // Slot grid – 8-button grid where each button represents a parking/charging
+        // slot
         VBox slotSection = new VBox(16);
         Label slotLabel = new Label("SELECT GRID SLOT");
         slotLabel.getStyleClass().add("card-title");
@@ -267,7 +271,7 @@ public class Plugin extends Application {
                     assignBtn.setText("ASSIGN SLOT " + btn.getText());
                     selectedSlot.set(btn);
                 });
-                
+
                 // Pre-selection logic
                 if (preSelectedSlot != null && preSelectedSlot.equals(finalSlotName)) {
                     Platform.runLater(() -> {
@@ -280,7 +284,6 @@ public class Plugin extends Application {
             slotsGrid.add(btn, i % 4, i / 4);
         }
 
-
         for (int i = 0; i < 4; i++) {
             ColumnConstraints cc = new ColumnConstraints();
             cc.setPercentWidth(25);
@@ -288,7 +291,7 @@ public class Plugin extends Application {
         }
         slotSection.getChildren().addAll(slotLabel, slotsGrid);
 
-        // User Identification
+        // User identification field – text input for the EV driver's name or ID
         VBox userSection = new VBox(16);
         HBox userHeaderBox = new HBox(8);
         userHeaderBox.setAlignment(Pos.CENTER_LEFT);
@@ -307,7 +310,8 @@ public class Plugin extends Application {
         userField.getStyleClass().add("input-field");
         userSection.getChildren().addAll(userHeaderBox, userField);
 
-        // Protocol
+        // Protocol selector – radio buttons for Type 1, Type 2, CCS and CHAdeMO
+        // connectors
         VBox protocolSection = new VBox(16);
         Label protocolLabel = new Label("CONNECTOR PROTOCOL");
         protocolLabel.getStyleClass().add("card-title");
@@ -411,7 +415,7 @@ public class Plugin extends Application {
     private VBox createRightColumn() {
         VBox rightColumn = new VBox(24);
 
-        // Infrastructure Health
+        // Infrastructure health card – core temperature and load balancing status
         VBox healthCard = new VBox(24);
         healthCard.getStyleClass().addAll("bg-surface-container-low", "card");
 
@@ -489,7 +493,7 @@ public class Plugin extends Application {
 
         healthCard.getChildren().addAll(healthHeader, tempMetric, loadMetric);
 
-        // Station Image Card
+        // Station image card – hero image of the charging station with overlay text
         StackPane stationCard = new StackPane();
         stationCard.getStyleClass().add("image-card");
         stationCard.setPrefHeight(100);
@@ -514,7 +518,7 @@ public class Plugin extends Application {
 
         stationCard.getChildren().add(stationText);
 
-        // Efficiency Card
+        // Efficiency card – system efficiency percentage with bolt icon
         HBox effCard = new HBox(16);
         effCard.setAlignment(Pos.CENTER_LEFT);
         effCard.getStyleClass().addAll("bg-surface-container-high", "card");

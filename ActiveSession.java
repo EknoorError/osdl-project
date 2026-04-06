@@ -81,6 +81,7 @@ public class ActiveSession extends Application {
         setupLiveTelemetry();
     }
 
+    // Live telemetry setup – 1-second timeline that pulls SimSession data and updates all labels
     private void setupLiveTelemetry() {
         if (slotId == null)
             return;
@@ -185,6 +186,7 @@ public class ActiveSession extends Application {
         timeline.play();
     }
 
+    // Sidebar – left navigation panel with app branding, nav links and emergency stop
     private VBox createSidebar(Stage stage) {
         VBox sidebar = new VBox();
         sidebar.setPrefWidth(256);
@@ -231,6 +233,7 @@ public class ActiveSession extends Application {
         return sidebar;
     }
 
+    // Nav item – single clickable row that routes to the selected module
     private HBox createNavItem(String text, boolean active, Stage stage) {
         HBox box = new HBox(16);
         box.setAlignment(Pos.CENTER_LEFT);
@@ -275,6 +278,7 @@ public class ActiveSession extends Application {
         return box;
     }
 
+    // Top navbar – search bar, system live badge and user avatar menu
     private HBox createTopNav() {
         HBox topNav = new HBox(16);
         topNav.setPrefHeight(64);
@@ -348,7 +352,7 @@ public class ActiveSession extends Application {
         VBox content = new VBox(32);
         content.setPadding(new Insets(40));
 
-        // Page Header
+        // Page header – station ID badge, session title and vehicle connection info
         HBox headerBox = new HBox();
         headerBox.setAlignment(Pos.BOTTOM_LEFT);
 
@@ -427,6 +431,7 @@ public class ActiveSession extends Application {
         return content;
     }
 
+    // Left gauge column – segmented charge bar, percentage display and power/speed/voltage stats
     private VBox createLeftGaugeColumn() {
         VBox box = new VBox(48);
         box.setAlignment(Pos.CENTER);
@@ -482,7 +487,7 @@ public class ActiveSession extends Application {
         gaugeText.getChildren().addAll(segmentedGauge, pctBox, statusBox);
         box.getChildren().add(gaugeText);
 
-        // Stats Below Gauge
+        // Stats row – Current Power, Peak Speed and Voltage shown below the gauge
         HBox statsBox = new HBox(48);
         statsBox.setAlignment(Pos.CENTER);
 
@@ -511,10 +516,11 @@ public class ActiveSession extends Application {
         return box;
     }
 
+    // Right metrics column – session health card, location map card and action buttons
     private VBox createRightMetricsColumn() {
         VBox box = new VBox(32);
 
-        // Session Health Card
+        // Session health card – time elapsed, estimated total, energy delivered and current cost
         VBox healthCard = new VBox(24);
         healthCard.setStyle(
                 "-fx-background-color: rgba(26,26,26,0.7); -fx-border-color: rgba(255,255,255,0.05); -fx-background-radius: 12; -fx-border-radius: 12; -fx-padding: 32;");
@@ -566,7 +572,7 @@ public class ActiveSession extends Application {
 
         healthCard.getChildren().addAll(hTitle, row1, divider, row2);
 
-        // Map / Location Card
+        // Location card – station address overlay and station temperature footer
         VBox mapCard = new VBox();
         mapCard.setStyle("-fx-background-color: #1a1a1a; -fx-background-radius: 12; -fx-overflow: hidden;");
 
@@ -609,8 +615,9 @@ public class ActiveSession extends Application {
         mapFooter.getChildren().addAll(tempBox, createSpacer(), new Label("\uD83D\uDDFA  \uD83D\uDCF6"));
         mapCard.getChildren().addAll(mapStack, mapFooter);
 
-        // Buttons Action Area
+        // Action buttons – Modify Target (boost progress) and Stop (end session early)
         HBox btnArea = new HBox(16);
+        // Button – Modify Target: boosts session progress by 15% for demo purposes
         Button btnModify = new Button("MODIFY TARGET \u270E");
         btnModify.setStyle(
                 "-fx-background-color: linear-gradient(to right, #81ecff, #00d4ec); -fx-text-fill: #003840; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 20; -fx-background-radius: 8; -fx-cursor: hand;");
@@ -628,6 +635,7 @@ public class ActiveSession extends Application {
             }
         });
 
+        // Button – Stop: ends the session early and moves it to pending payments
         Button btnStop = new Button("STOP");
         btnStop.setStyle(
                 "-fx-background-color: #262626; -fx-border-color: rgba(255,113,108,0.2); -fx-text-fill: #ff716c; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 20; -fx-background-radius: 8; -fx-border-radius: 8; -fx-cursor: hand;");
@@ -708,6 +716,7 @@ public class ActiveSession extends Application {
         return box;
     }
 
+    // Telemetry card – displays a single sensor reading (temperature, coolant, grid stability, etc.)
     private VBox createTelemetryCard(String title, Label v, String unit, String borderColor) {
         VBox card = new VBox(8);
         card.setStyle(

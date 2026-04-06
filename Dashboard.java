@@ -20,7 +20,7 @@ public class Dashboard extends Application {
     public final List<String> ALL_SLOTS = Arrays.asList("A-01", "A-02", "A-03", "B-01", "B-02", "B-03", "C-01",
             "C-02");
 
-    // In-memory simulation states
+    // SimSession model – holds in-memory state for each active charging slot
     public static class SimSession {
         public String slot, user, protocol, startTime, status;
         public double progress;
@@ -71,6 +71,7 @@ public class Dashboard extends Application {
 
     private final Map<String, SlotUI> uiSlots = new HashMap<>();
 
+    // SlotUI – reusable card widget representing a single charging slot on the grid
     class SlotUI {
         VBox card;
         Label lStatus, pLabel, icon, mTxt, f1, f2;
@@ -225,6 +226,8 @@ public class Dashboard extends Application {
         }
     }
 
+    // Simulation update loop – runs every second to advance progress and sync DB
+    // state
     private void updateSimulation() {
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:sessions.db");
                 Statement stmt = conn.createStatement()) {
@@ -381,6 +384,8 @@ public class Dashboard extends Application {
         }
     }
 
+    // UI refresh – updates slot cards, stats and activity log from current
+    // simulation state
     private void refreshUI() {
         lblActiveSessions.setText(String.valueOf(activeCharges.size()));
         lblTotalSlots.setText(String.valueOf(ALL_SLOTS.size()));
@@ -473,6 +478,8 @@ public class Dashboard extends Application {
         }
     }
 
+    // Sidebar – left navigation panel with app branding, nav links and emergency
+    // stop
     private VBox createSidebar(Stage stage) {
         VBox sidebar = new VBox();
         sidebar.setPrefWidth(256);
@@ -523,6 +530,7 @@ public class Dashboard extends Application {
         return sidebar;
     }
 
+    // Nav item – single clickable row that routes to the selected module
     private HBox createNavItem(String text, boolean active, Stage stage) {
         HBox box = new HBox(16);
         box.setAlignment(Pos.CENTER_LEFT);
@@ -567,6 +575,7 @@ public class Dashboard extends Application {
         return box;
     }
 
+    // Top navbar – search bar with live slot filtering and user avatar menu
     private HBox createTopNav() {
         HBox topNav = new HBox(16);
         topNav.setPrefHeight(64);
@@ -635,7 +644,7 @@ public class Dashboard extends Application {
         actTitle = new Label("RECENT ACTIVITY");
         actTitle.setStyle("-fx-text-fill: #adaaaa; -fx-font-size: 10px; -fx-font-weight: bold;");
 
-        // High-Level Summary Bento
+        // Summary bento cards – Total Slots, Active Sessions and Revenue Today stats
         HBox summaryBento = new HBox(24);
 
         VBox slotsCard = createSummaryCard("Total Slots", lblTotalSlots, "Online", "#81ecff");
@@ -662,7 +671,7 @@ public class Dashboard extends Application {
         HBox.setHgrow(revenueCard, Priority.ALWAYS);
         summaryBento.getChildren().addAll(slotsCard, activeCard, revenueCard);
 
-        // Dashboard Grid
+        // Live charging grid – FlowPane of slot cards with speed and status filters
         VBox gridSection = new VBox(24);
 
         HBox gridHeader = new HBox();
@@ -678,7 +687,7 @@ public class Dashboard extends Application {
                 createBtn("Standard", false, "STANDARD"));
         gridHeader.getChildren().addAll(gridTitle, gSpacer, filterBtns);
 
-        // Status Filter Tabs
+        // Status filter tabs – All / Available / Charging / Maintenance tab row
         HBox statusTabs = new HBox(16);
         statusTabs.setStyle("-fx-background-color: #131313; -fx-padding: 4; -fx-background-radius: 4;");
         statusTabs.getChildren().addAll(
@@ -708,7 +717,7 @@ public class Dashboard extends Application {
 
         gridSection.getChildren().addAll(gridHeader, statusTabs, slotGrid);
 
-        // Bottom Layout
+        // Bottom section – recent activity log panel
         HBox bottomSection = new HBox(32);
         HBox.setHgrow(activityBox, Priority.ALWAYS);
         bottomSection.getChildren().add(activityBox);
@@ -718,6 +727,7 @@ public class Dashboard extends Application {
         return content;
     }
 
+    // Summary card – reusable stat tile showing a title, big number and sub-label
     private VBox createSummaryCard(String title, Label lblVal, String sub, String colorStr) {
         VBox card = new VBox(16);
         card.setPrefWidth(220);
@@ -736,6 +746,7 @@ public class Dashboard extends Application {
         return card;
     }
 
+    // Filter button – speed filter toggle (All Slots / High Speed / Standard)
     private Button createBtn(String txt, boolean active, String filter) {
         Button btn = new Button(txt.toUpperCase());
         btn.setStyle(active
@@ -763,6 +774,7 @@ public class Dashboard extends Application {
         return btn;
     }
 
+    // Status tab – coloured dot + label tab for the status filter row
     private HBox createStatusTab(String txt, String color, boolean active) {
         HBox box = new HBox(8);
         box.setAlignment(Pos.CENTER);
@@ -776,6 +788,7 @@ public class Dashboard extends Application {
         return box;
     }
 
+    // Activity row – single recent-activity entry with icon, title and subtitle
     private HBox createActivityRow(String iconStr, String color, String title, String sub) {
         HBox row = new HBox(12);
         row.setAlignment(Pos.CENTER_LEFT);

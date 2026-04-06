@@ -1,3 +1,4 @@
+// Data model – represents a single EV charging session (slot, user, protocol, start time)
 public class ChargingSession {
     private String slot;
     private String user;
@@ -11,6 +12,7 @@ public class ChargingSession {
         this.startTime = startTime;
     }
 
+    // toCSV – serializes session fields as a comma-separated string
     public String toCSV() {
         return slot + "," + user + "," + protocol + "," + startTime;
     }

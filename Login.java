@@ -48,7 +48,7 @@ public class Login extends Application {
         panel.setMaxSize(900, 500);
         panel.setStyle("-fx-background-color: rgba(30, 30, 30, 0.85); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 12;");
         
-        // Left Branding Side
+        // Left branding panel – app tagline and link to create a new admin account
         VBox leftSide = new VBox(20);
         leftSide.setPrefWidth(400);
         leftSide.setPadding(new Insets(40));
@@ -67,6 +67,7 @@ public class Login extends Application {
         Region lSpacer = new Region();
         VBox.setVgrow(lSpacer, Priority.ALWAYS);
         
+        // Signup link – navigates to the registration screen
         HBox footerBox = new HBox(5);
         Label newOp = new Label("New operator?");
         newOp.setStyle("-fx-text-fill: #adaaaa; -fx-font-size: 12px;");
@@ -79,7 +80,7 @@ public class Login extends Application {
         
         leftSide.getChildren().addAll(icon, title, desc, lSpacer, footerBox);
         
-        // Right Login Form Side
+        // Right form panel – username, password inputs, Login button and security notice
         VBox rightSide = new VBox(24);
         rightSide.setPrefWidth(500);
         rightSide.setPadding(new Insets(60, 60, 60, 60));
@@ -92,14 +93,17 @@ public class Login extends Application {
         rSub.setStyle("-fx-text-fill: #adaaaa; -fx-font-size: 10px; -fx-font-family: monospace;");
         headerBox.getChildren().addAll(rTitle, rSub);
         
+        // Username field
         TextField txtUser = new TextField();
         txtUser.setPromptText("Username (admin)");
         txtUser.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: white; -fx-prompt-text-fill: rgba(255,255,255,0.3); -fx-padding: 12; -fx-background-radius: 6; -fx-border-color: transparent; -fx-font-size: 14px;");
         
+        // Password field
         PasswordField txtPass = new PasswordField();
         txtPass.setPromptText("Password");
         txtPass.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: white; -fx-prompt-text-fill: rgba(255,255,255,0.3); -fx-padding: 12; -fx-background-radius: 6; -fx-border-color: transparent; -fx-font-size: 14px;");
         
+        // Button – Login: validates credentials against the DB and opens the Dashboard
         Button btnLogin = new Button("LOGIN \u2192");
         btnLogin.setStyle("-fx-background-color: linear-gradient(to right, #00e5ff, #008b9c); -fx-text-fill: #002b30; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12; -fx-background-radius: 6; -fx-cursor: hand;");
         btnLogin.setMaxWidth(Double.MAX_VALUE);
@@ -120,6 +124,7 @@ public class Login extends Application {
         stage.show();
     }
     
+    // handleLogin – checks username/password in DB; on success opens Dashboard, else shows error
     private void handleLogin(String username, String password) {
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:sessions.db");
              Statement stmt = conn.createStatement()) {

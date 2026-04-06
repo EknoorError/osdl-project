@@ -44,7 +44,7 @@ public class Signup extends Application {
         panel.setMaxSize(900, 500);
         panel.setStyle("-fx-background-color: rgba(30, 30, 30, 0.85); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 12;");
         
-        // Left Side
+        // Left branding panel – tagline, description and return-to-login link
         VBox leftSide = new VBox(20);
         leftSide.setPrefWidth(350);
         leftSide.setPadding(new Insets(40));
@@ -63,6 +63,7 @@ public class Signup extends Application {
         Region lSpacer = new Region();
         VBox.setVgrow(lSpacer, Priority.ALWAYS);
         
+        // Return to login link – navigates back to the Login screen
         Hyperlink createAcc = new Hyperlink("\u2190 Return to Login");
         createAcc.setStyle("-fx-text-fill: #00e5ff; -fx-font-size: 12px; -fx-border-color: transparent; -fx-padding: 0;");
         createAcc.setOnAction(e -> {
@@ -71,7 +72,7 @@ public class Signup extends Application {
         
         leftSide.getChildren().addAll(icon, title, desc, lSpacer, createAcc);
         
-        // Right Form Side
+        // Right form panel – registration fields and Register Account button
         VBox rightSide = new VBox(24);
         rightSide.setPrefWidth(550);
         rightSide.setPadding(new Insets(40, 40, 40, 40));
@@ -86,6 +87,7 @@ public class Signup extends Application {
         rSub.setStyle("-fx-text-fill: #adaaaa; -fx-font-size: 10px; -fx-font-family: monospace;");
         headerBox.getChildren().addAll(rTitle, rSub);
         
+        // Input grid – Full Name, Employee ID, Station Location and Password fields
         GridPane grid = new GridPane();
         grid.setHgap(16);
         grid.setVgap(16);
@@ -105,6 +107,7 @@ public class Signup extends Application {
         txtPass.setPrefWidth(400);
         grid.add(createLabeledField("Set Password", txtPass), 0, 2, 2, 1);
         
+        // Button – Register Account: saves the new admin to the DB and redirects to Login
         Button btnSignup = new Button("REGISTER ACCOUNT \u2192");
         btnSignup.setStyle("-fx-background-color: linear-gradient(to right, #00e5ff, #3b82f6); -fx-text-fill: #002b30; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12; -fx-background-radius: 6; -fx-cursor: hand;");
         btnSignup.setMaxWidth(Double.MAX_VALUE);
@@ -141,6 +144,7 @@ public class Signup extends Application {
         return b;
     }
     
+    // handleSignup – inserts a new user row into the DB; shows success/error alert
     private void handleSignup(String name, String empId, String loc, String pass) {
         if(empId.isEmpty() || pass.isEmpty()) return;
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:sessions.db");
