@@ -1,0 +1,12 @@
+========================================
+          VOLT CHARGE RECEIPT           
+========================================
+Session ID: B01
+User:       Unknown User
+Protocol:   Standard Protocol
+Energy:     54.2 kWh
+Duration:   01:42:05
+----------------------------------------
+TOTAL DUE:  $31.91
+========================================
+Thank you for choosing Volt Charge.

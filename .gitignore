@@ -1,0 +1,20 @@
+# Java
+*.class
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# JAR files
+*.jar
+
+# Build folders
+bin/
+out/
+target/
