@@ -251,4 +251,4 @@ Slot Available again
 
 ---
 
-*© 2024 Volt Charge Network. Power Admin v1.0*
+*© 2026 Volt Charge Network. Power Admin v1.0*
