@@ -35,10 +35,10 @@ Key capabilities:
 | Component    | Technology                        |
 |--------------|-----------------------------------|
 | Language     | Java 17+                          |
-| UI Framework | JavaFX 21.0.10                    |
-| Database     | SQLite (via `sqlite-jdbc.jar`)     |
-| Styling      | JavaFX CSS (`plugin.css`)         |
-| Build        | Manual `javac` + `java` commands  |
+| UI Framework | JavaFX 21.0.2                     |
+| Database     | SQLite (managed via Maven)        |
+| Styling      | JavaFX CSS (`src/main/resources/plugin.css`) |
+| Build Tool   | Apache Maven                      |
 
 ---
 
@@ -46,18 +46,27 @@ Key capabilities:
 
 ```
 Java Project/
-├── Login.java            # Authentication screen
-├── Signup.java           # Admin registration screen
-├── Dashboard.java        # Main live grid dashboard
-├── Plugin.java           # Plug In / slot assignment screen
-├── ActiveSession.java    # Live charging session telemetry view
-├── Checkout.java         # Session summary, billing & payment
-├── Settings.java         # Pricing configuration & DB reset
-├── ChargingSession.java  # Data model for a charging session
-├── plugin.css            # Global JavaFX stylesheet
-├── sessions.db           # SQLite database (auto-created)
-├── login-bg.png          # Login background image
-└── signup-bg.png         # Signup background image
+├── pom.xml                 # Maven configuration
+├── src/
+│   ├── main/
+│   │   ├── java/           # Java source files
+│   │   │   ├── Login.java
+│   │   │   ├── Signup.java
+│   │   │   ├── Dashboard.java
+│   │   │   ├── Plugin.java
+│   │   │   ├── ActiveSession.java
+│   │   │   ├── Checkout.java
+│   │   │   ├── Settings.java
+│   │   │   ├── ChargingSession.java
+│   │   │   ├── AboutController.java
+│   │   │   └── AppLauncher.java
+│   │   └── resources/      # FXML, CSS, and Images
+│   │       ├── About.fxml
+│   │       ├── plugin.css
+│   │       ├── login-bg.png
+│   │       └── signup-bg.png
+├── sessions.db             # SQLite database (auto-created)
+└── README.md               # This file
 ```
 
 ---
@@ -65,7 +74,7 @@ Java Project/
 ## Modules
 
 ### 🔐 Login (`Login.java`)
-The entry point of the application. Validates admin credentials against the `users` table. On first launch, a default `admin / admin` account is created automatically.
+The entry point of the application (launched via `AppLauncher`). Validates admin credentials against the `users` table. On first launch, a default `admin / admin` account is created automatically.
 
 ### 📝 Signup (`Signup.java`)
 Allows new station administrators to register. Stores full name, employee ID, station location and password.
@@ -189,21 +198,19 @@ The application uses a single SQLite file: **`sessions.db`** (auto-created on fi
 
 ### Prerequisites
 - Java 17 or higher installed
-- JavaFX SDK 21 present in the project folder (`javafx-sdk-21.0.10/`)
+- [Apache Maven](https://maven.apache.org/download.cgi) installed and configured
 
-### Compile
-
-```bash
-javac --module-path javafx-sdk-21.0.10/lib --add-modules javafx.controls,javafx.fxml -cp sqlite-jdbc.jar *.java
-```
-
-### Run
+### Run the Application
 
 ```bash
-java --module-path javafx-sdk-21.0.10/lib --add-modules javafx.controls,javafx.fxml -cp ".;sqlite-jdbc.jar" Login
+mvn javafx:run
 ```
 
-> On **macOS/Linux**, replace `;` with `:` in the classpath.
+### Build the Project
+
+```bash
+mvn clean compile
+```
 
 ---
 
